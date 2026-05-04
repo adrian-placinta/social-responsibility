@@ -17,16 +17,16 @@ import com.socialportal.portal.service.VoteService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,32 +37,29 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class IssueServiceImplTest {
 
-    @Mock private IssueRepository issueRepository;
-    @Mock private IssueLocationRepository issueLocationRepository;
-    @Mock private UserEntityRepository userEntityRepository;
-    @Mock private VoteService voteService;
-    @Mock private ImageService imageService;
+    @Mock
+    private IssueRepository issueRepository;
+    @Mock
+    private IssueLocationRepository issueLocationRepository;
+    @Mock
+    private UserEntityRepository userEntityRepository;
+    @Mock
+    private VoteService voteService;
+    @Mock
+    private ImageService imageService;
 
+    @InjectMocks
     private IssueServiceImpl issueService;
-    private Authentication authentication;
 
+    private Authentication authentication;
     private UserEntity testUser;
-    private UserLocation testUserLocation;
-    private Issue testIssue;
     private IssueLocation testIssueLocation;
 
     @BeforeEach
     void setUp() {
-        issueService = new IssueServiceImpl(
-                issueRepository,
-                issueLocationRepository,
-                userEntityRepository,
-                voteService,
-                imageService
-        );
         authentication = new UsernamePasswordAuthenticationToken("test_user", "secret");
 
-        testUserLocation = new UserLocation();
+        UserLocation testUserLocation = new UserLocation();
         testUserLocation.setLatitude(44.4268);
         testUserLocation.setLongitude(26.1025);
         testUserLocation.setRadiusOfInterest(5.0);
@@ -72,10 +69,11 @@ class IssueServiceImplTest {
         testUser.setUsername("test_user");
         testUser.setUserLocation(testUserLocation);
 
-        testIssue = new Issue();
+        Issue testIssue = new Issue();
         testIssue.setId(100L);
         testIssue.setTitle("Groapa strada");
         testIssue.setDescription("Descriere");
+
         IssueImage issueImage = new IssueImage();
         testIssue.setImages(List.of(issueImage));
 
@@ -127,19 +125,17 @@ class IssueServiceImplTest {
 
     @Test
     void getIssuesUserNotFoundThrowsException() {
-        authentication = new UsernamePasswordAuthenticationToken("ghost", "secret");
+        Authentication ghostAuth = new UsernamePasswordAuthenticationToken("ghost", "secret");
         when(userEntityRepository.findByUsername("ghost")).thenReturn(Optional.empty());
 
         assertThrows(UsernameNotFoundException.class, () ->
-                issueService.getIssues(authentication, 0, 10));
+                issueService.getIssues(ghostAuth, 0, 10));
     }
 
     @Test
     void saveImageProcessingThrowsRuntimeExceptionOnIoError() throws IOException {
-        Issue issueData = new Issue();
         IssueRequest request = new IssueRequest();
-        request.setIssue(issueData);
-
+        request.setIssue(new Issue());
         MultipartFile file = mock(MultipartFile.class);
 
         when(imageService.buildImage(any())).thenThrow(new IOException("Disk full"));
