@@ -1,0 +1,234 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > UserServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.socialportal.portal.service.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: UserServiceImpl (com.socialportal.portal.service.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UserServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92.3%
+  </span>
+  <span class="absValue">
+    (36/39)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.socialportal.portal.service.impl;
+&nbsp;
+&nbsp;import com.socialportal.portal.dto.LoginResponse;
+&nbsp;import com.socialportal.portal.dto.RegisteredUserDto;
+&nbsp;import com.socialportal.portal.dto.UserImageDto;
+&nbsp;import com.socialportal.portal.exception.user.NoRolesDataBase;
+&nbsp;import com.socialportal.portal.exception.user.UserAlreadyExists;
+&nbsp;import com.socialportal.portal.model.user.UserEntity;
+&nbsp;import com.socialportal.portal.model.user.UserImage;
+&nbsp;import com.socialportal.portal.pojo.request.LoginRequest;
+&nbsp;import com.socialportal.portal.pojo.request.SignUpRequest;
+&nbsp;import com.socialportal.portal.repository.RoleRepository;
+&nbsp;import com.socialportal.portal.repository.UserEntityRepository;
+&nbsp;import com.socialportal.portal.security.JwtService;
+&nbsp;import com.socialportal.portal.service.ImageService;
+&nbsp;import com.socialportal.portal.service.UserService;
+&nbsp;import jakarta.transaction.Transactional;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.security.authentication.AuthenticationManager;
+&nbsp;import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+&nbsp;import org.springframework.security.core.AuthenticationException;
+&nbsp;import org.springframework.security.core.userdetails.User;
+&nbsp;import org.springframework.security.core.userdetails.UserDetails;
+&nbsp;import org.springframework.security.core.userdetails.UsernameNotFoundException;
+&nbsp;import org.springframework.security.crypto.password.PasswordEncoder;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.web.multipart.MultipartFile;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+&nbsp;@Transactional
+&nbsp;public class UserServiceImpl implements UserService {
+&nbsp;    private final UserEntityRepository userRepository;
+&nbsp;    private final RoleRepository roleRepository;
+&nbsp;    private final PasswordEncoder passwordEncoder;
+&nbsp;    private final AuthenticationManager authenticationManager;
+&nbsp;    private final JwtService jwtService;
+&nbsp;    private final ImageService imageService;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public RegisteredUserDto signUp(SignUpRequest signUpRequest, MultipartFile profilePic) {
+<b class="fc">&nbsp;        String username = signUpRequest.getUserEntity().getUsername();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (userRepository.existsByUsername(username)) {</b>
+<b class="fc">&nbsp;            throw new UserAlreadyExists(&quot;The username/email is already taken&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        UserEntity userToCommit = prepareUserForSignUp(signUpRequest, profilePic);</b>
+&nbsp;
+<b class="fc">&nbsp;        userRepository.save(userToCommit);</b>
+&nbsp;
+<b class="fc">&nbsp;        return new RegisteredUserDto(userToCommit.getUsername(), &quot;User registered successfully&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public LoginResponse login(LoginRequest loginRequest) throws AuthenticationException {
+<b class="fc">&nbsp;        UserDetails userCredentials = User</b>
+<b class="fc">&nbsp;                .withUsername(loginRequest.getUsername())</b>
+<b class="fc">&nbsp;                .password(loginRequest.getPassword())</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;
+<b class="fc">&nbsp;        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userCredentials.getUsername(), userCredentials.getPassword());</b>
+<b class="fc">&nbsp;        this.authenticationManager.authenticate(token);</b>
+<b class="fc">&nbsp;        LoginResponse jwtToken = new LoginResponse();</b>
+<b class="fc">&nbsp;        jwtToken.setTokenType(&quot;Bearer&quot;);</b>
+<b class="fc">&nbsp;        jwtToken.setAccess(jwtService.generateToken(userCredentials));</b>
+<b class="fc">&nbsp;        return jwtToken;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public UserImageDto getProfilePic(long id) {
+<b class="fc">&nbsp;        var user = this.userRepository.findById(id).orElseThrow(()-&gt;new UsernameNotFoundException(&quot;No user found in db&quot;));</b>
+<b class="fc">&nbsp;        var userImageDto = new UserImageDto();</b>
+<b class="fc">&nbsp;        var userImage = user.getUserImage();</b>
+<b class="pc">&nbsp;        if (userImage != null) {</b>
+<b class="nc">&nbsp;            var imagePayload = this.imageService.getPayload(userImage);</b>
+<b class="nc">&nbsp;            userImageDto.setUserImage(imagePayload);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return userImageDto;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private UserEntity prepareUserForSignUp(SignUpRequest signUpRequest, MultipartFile profilePic) {
+<b class="fc">&nbsp;        UserEntity userToCommit = signUpRequest.getUserEntity();</b>
+<b class="fc">&nbsp;        userToCommit.setUserLocation(signUpRequest.getGeoLocation());</b>
+&nbsp;
+<b class="fc">&nbsp;        var userRole = roleRepository.findByName(&quot;USER&quot;)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new NoRolesDataBase(&quot;No role present in db&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;        userToCommit.setRole(userRole);</b>
+&nbsp;
+<b class="fc">&nbsp;        if (profilePic!=null) {</b>
+<b class="fc">&nbsp;            var image = userImageBuilder(profilePic);</b>
+<b class="fc">&nbsp;            image.setUserEntity(userToCommit);</b>
+<b class="fc">&nbsp;            userToCommit.setUserImage(image);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        String bcryptPassword = passwordEncoder.encode(userToCommit.getPassword());</b>
+<b class="fc">&nbsp;        userToCommit.setPassword(bcryptPassword);</b>
+&nbsp;
+<b class="fc">&nbsp;        return userToCommit;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private UserImage userImageBuilder(MultipartFile file) {
+&nbsp;        try {
+<b class="fc">&nbsp;            var userImage = new UserImage();</b>
+<b class="fc">&nbsp;            this.imageService.imageMapper(this.imageService.buildImage(file), userImage);</b>
+<b class="fc">&nbsp;            return userImage;</b>
+&nbsp;
+&nbsp;        } catch (IOException e) {
+<b class="nc">&nbsp;            throw new RuntimeException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-05-04 13:21</div>
+</div>
+</body>
+</html>

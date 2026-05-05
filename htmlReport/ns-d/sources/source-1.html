@@ -1,0 +1,153 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AdministrationServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.socialportal.portal.service.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: AdministrationServiceImpl (com.socialportal.portal.service.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AdministrationServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.socialportal.portal.service.impl;
+&nbsp;
+&nbsp;import com.socialportal.portal.exception.issue.NoIssueFoundException;
+&nbsp;import com.socialportal.portal.exception.user.NoRolesDataBase;
+&nbsp;import com.socialportal.portal.exception.user.NoUserFoundException;
+&nbsp;import com.socialportal.portal.model.issues.Issue;
+&nbsp;import com.socialportal.portal.repository.IssueRepository;
+&nbsp;import com.socialportal.portal.repository.RoleRepository;
+&nbsp;import com.socialportal.portal.repository.UserEntityRepository;
+&nbsp;import com.socialportal.portal.service.AdministrationService;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;import org.springframework.data.domain.PageRequest;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class AdministrationServiceImpl implements AdministrationService {
+&nbsp;    private final IssueRepository issueRepository;
+&nbsp;    private final UserEntityRepository userEntityRepository;
+&nbsp;    private final RoleRepository roleRepository;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Page&lt;Issue&gt; getAllIssuesByStatus(boolean status, int pageNo, int pageSize) {
+<b class="fc">&nbsp;        Pageable pageRequest = PageRequest.of(pageNo, pageSize);</b>
+<b class="fc">&nbsp;        return this.issueRepository.findAllByStatus(status, pageRequest);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void deactivateIssuesById(long issueId) {
+<b class="fc">&nbsp;        var issue = this.issueRepository.findById(issueId)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new NoIssueFoundException(&quot;No issue found in database&quot;));</b>
+<b class="fc">&nbsp;        issue.setArchived(true);</b>
+<b class="fc">&nbsp;        this.issueRepository.save(issue);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void createAdmin(long userId) {
+<b class="fc">&nbsp;        var user = this.userEntityRepository.findById(userId)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new NoUserFoundException(&quot;User cannot be found in db&quot;));</b>
+<b class="fc">&nbsp;        user.setRole(this.roleRepository</b>
+<b class="fc">&nbsp;                .findByName(&quot;ADMIN&quot;)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new NoRolesDataBase(&quot;No role present in db&quot;)));</b>
+<b class="fc">&nbsp;        this.userEntityRepository.save(user);</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-05-04 13:21</div>
+</div>
+</body>
+</html>

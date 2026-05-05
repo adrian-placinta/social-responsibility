@@ -1,0 +1,273 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > IssueServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.socialportal.portal.service.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: IssueServiceImpl (com.socialportal.portal.service.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IssueServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (63/63)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.socialportal.portal.service.impl;
+&nbsp;
+&nbsp;
+&nbsp;import com.socialportal.portal.dto.IssueResponseDto;
+&nbsp;import com.socialportal.portal.model.geo.IssueLocation;
+&nbsp;import com.socialportal.portal.model.issues.Issue;
+&nbsp;import com.socialportal.portal.model.issues.IssueImage;
+&nbsp;import com.socialportal.portal.model.user.UserEntity;
+&nbsp;import com.socialportal.portal.pojo.request.IssueRequest;
+&nbsp;import com.socialportal.portal.repository.IssueLocationRepository;
+&nbsp;import com.socialportal.portal.repository.IssueRepository;
+&nbsp;import com.socialportal.portal.repository.UserEntityRepository;
+&nbsp;import com.socialportal.portal.service.ImageService;
+&nbsp;import com.socialportal.portal.service.IssueService;
+&nbsp;import com.socialportal.portal.service.VoteService;
+&nbsp;import com.socialportal.portal.service.utils.Slicer;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;import org.springframework.data.domain.PageImpl;
+&nbsp;import org.springframework.data.domain.PageRequest;
+&nbsp;import org.springframework.security.core.Authentication;
+&nbsp;import org.springframework.security.core.userdetails.UsernameNotFoundException;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.web.multipart.MultipartFile;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@RequiredArgsConstructor
+&nbsp;@Service
+&nbsp;public class IssueServiceImpl implements IssueService {
+&nbsp;    private final IssueRepository issueRepository;
+&nbsp;    private final IssueLocationRepository issueLocationRepository;
+&nbsp;    private final UserEntityRepository userEntityRepository;
+&nbsp;    private final VoteService voteService;
+&nbsp;    private final ImageService imageService;
+&nbsp;
+&nbsp;    public Issue save(IssueRequest issueRequest, List&lt;MultipartFile&gt; imgList, Authentication authentication) {
+<b class="fc">&nbsp;        Issue issue = issueRequest.getIssue();</b>
+<b class="pc">&nbsp;        if (imgList != null) {</b>
+<b class="fc">&nbsp;            issue.setImages(imgList</b>
+<b class="fc">&nbsp;                    .stream()</b>
+<b class="fc">&nbsp;                    .map(this::issueImageBuilder)</b>
+<b class="fc">&nbsp;                    .toList()</b>
+&nbsp;            );
+&nbsp;        }
+<b class="fc">&nbsp;        issue.setAuthor(findUserByUsername(authentication.getName()));</b>
+<b class="fc">&nbsp;        issue.setIssueLocation(issueRequest.getIssueLocation());</b>
+&nbsp;
+<b class="fc">&nbsp;        return this.issueRepository.save(issue);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private IssueImage issueImageBuilder(MultipartFile file) {
+&nbsp;        try {
+<b class="fc">&nbsp;            var issueImage = new IssueImage();</b>
+<b class="fc">&nbsp;            this.imageService.imageMapper(this.imageService.buildImage(file), issueImage);</b>
+<b class="fc">&nbsp;            return issueImage;</b>
+&nbsp;
+&nbsp;        } catch (IOException e) {
+<b class="fc">&nbsp;            throw new RuntimeException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Page&lt;IssueResponseDto&gt; getIssues(Authentication authentication, int pageNumber, int pageSize) {
+&nbsp;
+<b class="fc">&nbsp;        var userName = authentication.getName();</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;Issue&gt; issues = this.findIssuesByUserInterestZone(userName);</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;IssueResponseDto&gt; content = mapIssuesToDto(issues, userName);</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;IssueResponseDto&gt; paginatedContent = Slicer.sliceContent(content, pageNumber, pageSize);</b>
+&nbsp;
+<b class="fc">&nbsp;        return new PageImpl&lt;&gt;(paginatedContent, PageRequest.of(pageNumber, pageSize), paginatedContent.size());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Issue&gt; findIssuesByUserInterestZone(String username) {
+<b class="fc">&nbsp;        var coordinates = getUserInterestZone(username);</b>
+<b class="fc">&nbsp;        List&lt;IssueLocation&gt; issueLocations = this.issueLocationRepository.findAllByLatitudeBetweenAndLongitudeBetween</b>
+<b class="fc">&nbsp;                (</b>
+<b class="fc">&nbsp;                        coordinates.get(0),</b>
+<b class="fc">&nbsp;                        coordinates.get(1),</b>
+<b class="fc">&nbsp;                        coordinates.get(2),</b>
+<b class="fc">&nbsp;                        coordinates.get(3)</b>
+&nbsp;                );
+&nbsp;
+<b class="fc">&nbsp;        return issueLocations.stream().map(IssueLocation::getIssue).toList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Double&gt; getUserInterestZone(String username) {
+<b class="fc">&nbsp;        var user = findUserByUsername(username);</b>
+<b class="fc">&nbsp;        var userLocation = user.getUserLocation();</b>
+<b class="fc">&nbsp;        return getBoundingBox</b>
+<b class="fc">&nbsp;                (</b>
+<b class="fc">&nbsp;                        userLocation.getLatitude(),</b>
+<b class="fc">&nbsp;                        userLocation.getLongitude(),</b>
+<b class="fc">&nbsp;                        userLocation.getRadiusOfInterest() * 1000.0 // from km to meters</b>
+&nbsp;                );
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;IssueResponseDto&gt; mapIssuesToDto(List&lt;Issue&gt; issueLocations, String username) {
+<b class="fc">&nbsp;        var userId = findUserByUsername(username).getId();</b>
+<b class="fc">&nbsp;        return issueLocations</b>
+<b class="fc">&nbsp;                .stream()</b>
+<b class="fc">&nbsp;                .map(issue -&gt;</b>
+&nbsp;                        {
+<b class="fc">&nbsp;                            var issueId = issue.getId();</b>
+<b class="fc">&nbsp;                            var issueTitle = issue.getTitle();</b>
+<b class="fc">&nbsp;                            var issueDescription = issue.getDescription();</b>
+<b class="fc">&nbsp;                            var issueVoteStats = this.voteService.getVotesByIssueId(issueId);</b>
+<b class="fc">&nbsp;                            var currentUserVote = this.voteService.getTotalVotesForUserAndIssue(issueId, userId);</b>
+<b class="fc">&nbsp;                            var issueImages = issue.getImages().stream().map(this.imageService::getPayload).toList();</b>
+<b class="fc">&nbsp;                            return new IssueResponseDto</b>
+&nbsp;                                    (
+&nbsp;                                            issueId,
+&nbsp;                                            issueTitle,
+&nbsp;                                            issueDescription,
+&nbsp;                                            issueImages,
+&nbsp;                                            issueVoteStats,
+&nbsp;                                            currentUserVote
+&nbsp;                                    );
+&nbsp;                        }
+&nbsp;                )
+<b class="fc">&nbsp;                .toList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Double&gt; getBoundingBox(final double pLatitude, final double pLongitude, double pDistanceInMeters) {
+<b class="fc">&nbsp;        final List&lt;Double&gt; boundingBox = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;        final double latRadian = Math.toRadians(pLatitude);</b>
+&nbsp;
+<b class="fc">&nbsp;        final double degLatKm = 110.574235;</b>
+<b class="fc">&nbsp;        final double degLongKm = 110.572833 * Math.cos(latRadian);</b>
+<b class="fc">&nbsp;        final double deltaLat = pDistanceInMeters / 1000.0 / degLatKm;</b>
+<b class="fc">&nbsp;        final double deltaLong = pDistanceInMeters / 1000.0 / degLongKm;</b>
+&nbsp;
+<b class="fc">&nbsp;        final double minLat = pLatitude - deltaLat;</b>
+<b class="fc">&nbsp;        final double minLong = pLongitude - deltaLong;</b>
+<b class="fc">&nbsp;        final double maxLat = pLatitude + deltaLat;</b>
+<b class="fc">&nbsp;        final double maxLong = pLongitude + deltaLong;</b>
+&nbsp;
+<b class="fc">&nbsp;        boundingBox.add(minLat);</b>
+<b class="fc">&nbsp;        boundingBox.add(maxLat);</b>
+<b class="fc">&nbsp;        boundingBox.add(minLong);</b>
+<b class="fc">&nbsp;        boundingBox.add(maxLong);</b>
+&nbsp;
+<b class="fc">&nbsp;        return boundingBox;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private UserEntity findUserByUsername(String username) {
+<b class="fc">&nbsp;        return this.userEntityRepository</b>
+<b class="fc">&nbsp;                .findByUsername(username)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new UsernameNotFoundException(&quot;User cannot be located in db. Database corrupted!!&quot;));</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-05-04 13:21</div>
+</div>
+</body>
+</html>

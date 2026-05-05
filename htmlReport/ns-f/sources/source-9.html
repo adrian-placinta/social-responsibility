@@ -1,0 +1,92 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > CommentRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.socialportal.portal.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: CommentRepository (com.socialportal.portal.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">CommentRepository$MockitoMock$Y2FRSCHD</td>
+  </tr>
+  <tr>
+    <td class="name">CommentRepository$MockitoMock$Y2FRSCHD$auxiliary$RJUBBgMA</td>
+  </tr>
+  <tr>
+    <td class="name">CommentRepository$MockitoMock$Y2FRSCHD$auxiliary$xIMktrU1</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.socialportal.portal.repository;
+&nbsp;
+&nbsp;import com.socialportal.portal.model.issues.Comment;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;public interface CommentRepository extends JpaRepository&lt;Comment, Long&gt; {
+&nbsp;    @Query(value = &quot;SELECT * FROM issue_comments WHERE issue_id = ?1&quot;, nativeQuery = true)
+&nbsp;    Optional&lt;List&lt;Comment&gt;&gt; findAllCommentsForIssue(long id);
+&nbsp;    @Query(value = &quot;SELECT * FROM issue_comments where id = ?1 AND user_entity_id = ?2&quot;, nativeQuery = true)
+&nbsp;    Optional&lt;Comment&gt; findCommentByUserIdAndCommentId(long commentId, long userId);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-05-04 13:21</div>
+</div>
+</body>
+</html>

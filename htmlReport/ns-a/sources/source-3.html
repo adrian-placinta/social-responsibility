@@ -1,0 +1,145 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > UserEntity</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.socialportal.portal.model.user</a>
+</div>
+
+<h1>Coverage Summary for Class: UserEntity (com.socialportal.portal.model.user)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">UserEntity</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.socialportal.portal.model.user;
+&nbsp;
+&nbsp;import com.fasterxml.jackson.annotation.JsonIgnore;
+&nbsp;import com.fasterxml.jackson.annotation.JsonProperty;
+&nbsp;import com.socialportal.portal.model.geo.UserLocation;
+&nbsp;import jakarta.persistence.*;
+&nbsp;import jakarta.validation.constraints.AssertFalse;
+&nbsp;import jakarta.validation.constraints.Email;
+&nbsp;import jakarta.validation.constraints.NotBlank;
+&nbsp;import jakarta.validation.constraints.Size;
+&nbsp;import lombok.AllArgsConstructor;
+&nbsp;import lombok.Getter;
+&nbsp;import lombok.NoArgsConstructor;
+&nbsp;import lombok.Setter;
+&nbsp;import org.hibernate.annotations.NaturalId;
+&nbsp;
+&nbsp;@AllArgsConstructor
+&nbsp;@NoArgsConstructor
+&nbsp;@Getter
+&nbsp;@Setter
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;users&quot;)
+&nbsp;public class UserEntity {
+&nbsp;    @JsonIgnore
+&nbsp;    @Id
+&nbsp;    @GeneratedValue(strategy = GenerationType.IDENTITY)
+&nbsp;    @Column(name = &quot;id&quot;)
+&nbsp;    private Long id;
+&nbsp;
+&nbsp;    @NotBlank
+&nbsp;    @Column(name = &quot;first_name&quot;)
+&nbsp;    @Size(max = 40)
+&nbsp;    private String firstName;
+&nbsp;
+&nbsp;    @NotBlank
+&nbsp;    @Column(name = &quot;last_name&quot;)
+&nbsp;    @Size(max = 40)
+&nbsp;    private String lastName;
+&nbsp;
+&nbsp;    @NotBlank
+&nbsp;    @NaturalId
+&nbsp;    @Column(name = &quot;username&quot;, unique = true)
+&nbsp;    @Size(max = 15)
+&nbsp;    private String username;
+&nbsp;
+&nbsp;    @NotBlank
+&nbsp;    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+&nbsp;    @Size(max = 100)
+&nbsp;    @Column(name = &quot;password&quot;)
+&nbsp;    private String password;
+&nbsp;
+&nbsp;    @NotBlank
+&nbsp;    @Size(max = 40)
+&nbsp;    @Column(name = &quot;email&quot;, unique = true)
+&nbsp;    @Email
+&nbsp;    private String email;
+&nbsp;
+&nbsp;    @NotBlank
+&nbsp;    private String gender;
+&nbsp;
+&nbsp;    @OneToOne(cascade = CascadeType.ALL)
+&nbsp;    @JoinColumn(name = &quot;geo_location&quot;)
+&nbsp;    private UserLocation userLocation;
+&nbsp;
+&nbsp;    @JsonIgnore
+&nbsp;    @AssertFalse
+&nbsp;    private boolean accepted;
+&nbsp;
+&nbsp;    @JsonIgnore
+&nbsp;    @ManyToOne(fetch = FetchType.EAGER)
+&nbsp;    private Roles role;
+&nbsp;
+&nbsp;    @JsonIgnore
+&nbsp;    @OneToOne(mappedBy = &quot;userEntity&quot;, cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+&nbsp;    private UserImage userImage;
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-05-04 13:21</div>
+</div>
+</body>
+</html>
