@@ -155,6 +155,133 @@
 
 <p><b>N Tier Architecture:</b></p>
 <i>Client <--> Controller <--> Service <--> DAO <--> DB</i>
+
+## System Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph Client["👤 Client Layer"]
+        Web["🌐 Web Browser<br/>REST Client"]
+    end
+
+    subgraph Security["🔒 Security Layer"]
+        JwtFilter["JWT Token Filter"]
+        AuthProvider["Authentication<br/>Provider"]
+    end
+
+    subgraph API["🔌 REST API Layer"]
+        AdminCtrl["⚙️ AdminController<br/>/api/v1/admin"]
+        IssueCtrl["📋 IssueController<br/>/api/v1/issues"]
+        UserCtrl["👥 UserController<br/>/api/v1/users"]
+    end
+
+    subgraph Services["🧠 Business Logic Layer"]
+        subgraph AdminSvc["Admin Operations"]
+            AdminService["AdministrationService"]
+        end
+        subgraph ContentSvc["Content Services"]
+            IssueService["IssueService"]
+            CommentService["CommentService"]
+            VoteService["VoteService"]
+        end
+        subgraph UserSvc["User Services"]
+            UserService["UserService"]
+            ImageService["ImageService"]
+        end
+    end
+
+    subgraph Models["📦 Domain Model Layer"]
+        User["User"]
+        Issue["Issue"]
+        Comment["Comment"]
+        Vote["Vote"]
+        UserImage["UserImage"]
+        IssueImage["IssueImage"]
+        Role["Role"]
+        Location["Location"]
+    end
+
+    subgraph Repositories["🗄️ Data Access Layer"]
+        UserRepo["UserEntityRepository"]
+        IssueRepo["IssueRepository"]
+        CommentRepo["CommentRepository"]
+        VoteRepo["VoteRepository"]
+        UserImgRepo["UserImageRepository"]
+        IssueImgRepo["IssueImageRepository"]
+        RoleRepo["RoleRepository"]
+        LocationRepo["LocationRepository"]
+    end
+
+    subgraph Database["💾 Persistence Layer"]
+        MariaDB["🗃️ MariaDB<br/>Relational Database"]
+        Storage["📁 File Storage<br/>Images & Media"]
+    end
+
+    Web -->|HTTP Requests| JwtFilter
+    JwtFilter -->|Token Validation| AuthProvider
+    AuthProvider -->|Route to Controller| AdminCtrl
+    AuthProvider -->|Route to Controller| IssueCtrl
+    AuthProvider -->|Route to Controller| UserCtrl
+
+    AdminCtrl -->|Delegate| AdminService
+    IssueCtrl -->|Delegate| IssueService
+    IssueCtrl -->|Delegate| CommentService
+    IssueCtrl -->|Delegate| VoteService
+    UserCtrl -->|Delegate| UserService
+
+    AdminService -->|Query| IssueService
+    AdminService -->|Manage| UserService
+    
+    IssueService -->|Handle Media| ImageService
+    UserService -->|Handle Media| ImageService
+
+    AdminService -->|Query| IssueRepo
+    AdminService -->|Query| UserRepo
+    IssueService -->|Query| IssueRepo
+    CommentService -->|Query| CommentRepo
+    VoteService -->|Query| VoteRepo
+    UserService -->|Query| UserRepo
+    UserService -->|Query| RoleRepo
+    ImageService -->|Query| UserImgRepo
+    ImageService -->|Query| IssueImgRepo
+
+    IssueRepo -->|ORM| Issue
+    CommentRepo -->|ORM| Comment
+    VoteRepo -->|ORM| Vote
+    UserRepo -->|ORM| User
+    UserImgRepo -->|ORM| UserImage
+    IssueImgRepo -->|ORM| IssueImage
+    RoleRepo -->|ORM| Role
+    LocationRepo -->|ORM| Location
+
+    IssueRepo -->|Persist| MariaDB
+    CommentRepo -->|Persist| MariaDB
+    VoteRepo -->|Persist| MariaDB
+    UserRepo -->|Persist| MariaDB
+    UserImgRepo -->|Persist| MariaDB
+    IssueImgRepo -->|Persist| MariaDB
+    RoleRepo -->|Persist| MariaDB
+    LocationRepo -->|Persist| MariaDB
+
+    ImageService -->|Store/Retrieve| Storage
+
+    classDef clientStyle fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
+    classDef securityStyle fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    classDef apiStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
+    classDef serviceStyle fill:#e8f5e9,stroke:#388e3c,stroke-width:2px,color:#000
+    classDef modelStyle fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#000
+    classDef repoStyle fill:#e0f2f1,stroke:#00796b,stroke-width:2px,color:#000
+    classDef dbStyle fill:#ffebee,stroke:#d32f2f,stroke-width:2px,color:#000
+
+    class Web clientStyle
+    class JwtFilter,AuthProvider securityStyle
+    class AdminCtrl,IssueCtrl,UserCtrl apiStyle
+    class AdminService,IssueService,CommentService,VoteService,UserService,ImageService serviceStyle
+    class User,Issue,Comment,Vote,UserImage,IssueImage,Role,Location modelStyle
+    class UserRepo,IssueRepo,CommentRepo,VoteRepo,UserImgRepo,IssueImgRepo,RoleRepo,LocationRepo repoStyle
+    class MariaDB,Storage dbStyle
+```
+
 <details>
 <ol>
  <li>Controller</li>
