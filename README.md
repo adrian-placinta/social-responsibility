@@ -153,11 +153,6 @@
 </ol>
 <h2>🏗️ Architecture</h2>
 
-<p><b>N Tier Architecture:</b></p>
-<i>Client <--> Controller <--> Service <--> DAO <--> DB</i>
-
-## System Architecture Diagram
-
 ```mermaid
 graph TB
     subgraph Client["👤 Client Layer"]
