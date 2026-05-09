@@ -168,6 +168,9 @@
 </ol>
 </details>
 
+Coverage report -> generated from IntellIJ
+<img width="2102" height="818" alt="image" src="https://github.com/user-attachments/assets/461194a8-44a8-417a-84bb-c038fbf7470b" />
+
 
 
 
